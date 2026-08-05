@@ -286,11 +286,10 @@ High-level implementation slices — detailed checklist in **[tasks.md](./tasks.
 | 2026-08-05 | API grilling | PUT+PATCH+favorite toggle; cuid ids; 201/200/204; error `details` on 400; optimistic UI only for favorite; PUT clears omitted optionals |
 | 2026-08-05 | `/speckit-plan` | plan.md, research.md, data-model.md, contracts/contacts.openapi.yaml, quickstart.md generated |
 | 2026-08-05 | `/speckit-tasks` | tasks.md generated (T001–T052); later +T053 for NFR-P1 |
-| 2026-08-05 | `/speckit-analyze` remediation | I1=detail page; I2=edit PATCH-only; U1=create all optionals except photo; C1=duration middleware + docs |
-| 2026-08-05 | `/speckit-implement` | Full app shipped; Playwright E2E (5 passed); README; git remote connected |
-| | Push | Pending until commit |
-| | `/speckit-tasks` | Pending |
-| | `/speckit-implement` | Pending |
+| 2026-08-05 | `/speckit-analyze` | Cross-artifact review; remediation locks I1/I2/U1/C1 applied |
+| 2026-08-05 | `/speckit-implement` | Full app shipped (`client/` + `server/`); Playwright E2E 5/5; README; tasks T001–T053 marked done |
+| 2026-08-05 | Git / push | Repo linked to `https://github.com/Jordan1881/Contacts-Manager-ex4.git`; `main` pushed (`bb97b6b` implement, follow-ups `bb95a68`, `503c890`) |
+| 2026-08-05 | Spec compliance review | FR 13/13 met; main Spec wording gap = literal shadcn vs Tailwind+custom UI |
 
 ---
 
