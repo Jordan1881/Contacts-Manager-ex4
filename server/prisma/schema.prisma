@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Contact {
+  id         String    @id @default(cuid())
+  name       String
+  phone      String    @unique
+  email      String?
+  address    String?
+  birthday   DateTime?
+  notes      String?
+  photoUrl   String?
+  isFavorite Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([name])
+}

@@ -1,0 +1,306 @@
+openapi: 3.0.3
+info:
+  title: Contacts Manager API
+  version: 1.0.0
+  description: Single-user contacts CRUD API for bootcamp feature 001-contacts-manager.
+servers:
+  - url: http://localhost:3001
+    description: Local Express server (port may vary; see server .env)
+paths:
+  /api/contacts:
+    get:
+      summary: List contacts (paginated)
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Case-insensitive substring on name, phone, email
+        - in: query
+          name: favorite
+          schema:
+            type: string
+            enum: ["true", "false"]
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Paginated list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactListResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+    post:
+      summary: Create contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+  /api/contacts/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ContactId"
+    get:
+      summary: Get contact by id
+      responses:
+        "200":
+          description: Contact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+    put:
+      summary: Replace contact (name+phone required; omitted optionals cleared)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactPut"
+      responses:
+        "200":
+          description: Replaced
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+    patch:
+      summary: Partial update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactPatch"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+    delete:
+      summary: Hard delete
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+  /api/contacts/{id}/favorite:
+    parameters:
+      - $ref: "#/components/parameters/ContactId"
+    patch:
+      summary: Toggle isFavorite (empty body)
+      responses:
+        "200":
+          description: Toggled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+components:
+  parameters:
+    ContactId:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        description: cuid
+  schemas:
+    Contact:
+      type: object
+      required:
+        - id
+        - name
+        - phone
+        - isFavorite
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        birthday:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        photoUrl:
+          type: string
+          format: uri
+          nullable: true
+        isFavorite:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ContactCreate:
+      type: object
+      required: [name, phone]
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        birthday:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        photoUrl:
+          type: string
+          format: uri
+          nullable: true
+        isFavorite:
+          type: boolean
+    ContactPut:
+      allOf:
+        - $ref: "#/components/schemas/ContactCreate"
+      description: >
+        name and phone required. Omitted optional fields are cleared
+        (null / isFavorite false).
+    ContactPatch:
+      type: object
+      minProperties: 1
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        birthday:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        photoUrl:
+          type: string
+          format: uri
+          nullable: true
+        isFavorite:
+          type: boolean
+    ContactListResponse:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Contact"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+    ErrorBody:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+    ValidationErrorBody:
+      allOf:
+        - $ref: "#/components/schemas/ErrorBody"
+        - type: object
+          properties:
+            details:
+              type: array
+              items:
+                type: object
+                required: [field, message]
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+  responses:
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationErrorBody"
+    NotFoundError:
+      description: Contact not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    ConflictError:
+      description: Duplicate phone
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
